@@ -1,8 +1,24 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
 import { Task, TaskStatus } from "@/types";
 import { getTasks, updateTaskStatus } from "@/api/tasks";
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 interface TaskCardProps {
   task: Task;
@@ -79,6 +95,10 @@ export default function KanbanBoard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [moveError, setMoveError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // debounce search query
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // init data fetch
   useEffect(() => {
@@ -95,6 +115,15 @@ export default function KanbanBoard() {
 
     fetchTasks();
   }, []);
+
+  // filter tasks based on debounced query
+  const filteredTasks = useMemo(() => {
+    if (!debouncedSearchQuery.trim()) return tasks;
+
+    return tasks.filter((task) =>
+      task.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
+    );
+  }, [tasks, debouncedSearchQuery]);
 
   const handleMove = async (taskId: string, newStatus: TaskStatus) => {
     const originalTasks = [...tasks];
@@ -133,12 +162,24 @@ export default function KanbanBoard() {
           {moveError}
         </div>
       )}
+
+      <div className={styles.controls}>
+        <input
+          type="text"
+          placeholder="Search tasks by title..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={styles.searchInput}
+          aria-label="Search tasks by title"
+        />
+      </div>
+
       <div className={styles.board}>
         {(["TODO", "IN_PROGRESS", "DONE"] as TaskStatus[]).map((status) => (
           <Column
             key={status}
             status={status}
-            tasks={tasks}
+            tasks={filteredTasks}
             onMove={handleMove}
           />
         ))}
