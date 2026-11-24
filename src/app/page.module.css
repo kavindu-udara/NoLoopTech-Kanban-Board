@@ -281,3 +281,22 @@
   background-color: var(--color-primary-hover);
   border-color: var(--color-primary-hover);
 }
+
+/* responsive */
+@media (max-width: 767px) {
+  .board {
+    flex-direction: column;
+  }
+
+  .column {
+    width: 100%;
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+
+  .searchInput {
+    width: 100%;
+  }
+}
