@@ -11,6 +11,8 @@
   --color-error-bg: #fef2f2;
   --color-error-text: #b91c1c;
   --color-error-border: #fecaca;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
 
   /* spaces */
   --spacing-xs: 8px;
@@ -216,4 +218,66 @@
   outline: none;
   border-color: var(--color-primary);
   box-shadow: var(--focus-ring);
+}
+
+.addForm {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.formGroup {
+  margin-bottom: var(--spacing-md);
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text-secondary);
+}
+
+.formActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.input {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  background-color: var(--color-bg);
+}
+
+.input:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+}
+
+.errorText {
+  display: block;
+  color: var(--color-error-text);
+  font-size: 0.8rem;
+  margin-top: var(--spacing-xs);
+  font-weight: 500;
+}
+
+.buttonPrimary {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.buttonPrimary:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }

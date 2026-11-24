@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { SubmitEvent, useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
-import { Task, TaskStatus } from "@/types";
-import { getTasks, updateTaskStatus } from "@/api/tasks";
+import { CreateTaskInput, Task, TaskStatus } from "@/types";
+import { createTask, getTasks, updateTaskStatus } from "@/api/tasks";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -97,6 +97,10 @@ export default function KanbanBoard() {
   const [moveError, setMoveError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  const [isAddingTask, setIsAddingTask] = useState<boolean>(false);
+  const [newTaskTitle, setNewTaskTitle] = useState<string>("");
+  const [newTaskError, setNewTaskError] = useState<string | null>(null);
+
   // debounce search query
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -145,6 +149,35 @@ export default function KanbanBoard() {
     }
   };
 
+  const handleAddTask = async (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const trimmedTitle = newTaskTitle.trim();
+
+    // client side match api rules
+    if (!trimmedTitle) {
+      setNewTaskError("Title is required.");
+      return;
+    }
+
+    if (trimmedTitle.length > 80) {
+      setNewTaskError("Title must be at most 80 characters.");
+      return;
+    }
+
+    setNewTaskError(null);
+
+    const input: CreateTaskInput = { title: trimmedTitle, status: "TODO" };
+
+    try {
+      const createdTask = await createTask(input);
+      setTasks((prev) => [...prev, createdTask]);
+      setNewTaskTitle("");
+      setIsAddingTask(false);
+    } catch (error: any) {
+      setNewTaskError(error.message || "Failed to create task.");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={styles.container}>
@@ -172,7 +205,59 @@ export default function KanbanBoard() {
           className={styles.searchInput}
           aria-label="Search tasks by title"
         />
+        <button
+          className={`${styles.button} ${styles.buttonPrimary}`}
+          onClick={() => setIsAddingTask(true)}
+        >
+          + Add Task
+        </button>
       </div>
+
+      {isAddingTask && (
+        <form onSubmit={handleAddTask} className={styles.addForm}>
+          <div className={styles.formGroup}>
+            <label htmlFor="new-task-title" className={styles.label}>
+              Task Title
+            </label>
+            <input
+              id="new-task-title"
+              type="text"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              className={styles.input}
+              maxLength={80}
+              autoFocus
+              aria-required="true"
+              aria-invalid={!!newTaskError}
+              aria-describedby={newTaskError ? "title-error" : undefined}
+            />
+            {newTaskError && (
+              <span id="title-error" className={styles.errorText} role="alert">
+                {newTaskError}
+              </span>
+            )}
+          </div>
+          <div className={styles.formActions}>
+            <button
+              type="submit"
+              className={`${styles.button} ${styles.buttonPrimary}`}
+            >
+              Create Task
+            </button>
+            <button
+              type="button"
+              className={styles.button}
+              onClick={() => {
+                setIsAddingTask(false);
+                setNewTaskError(null);
+                setNewTaskTitle("");
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
 
       <div className={styles.board}>
         {(["TODO", "IN_PROGRESS", "DONE"] as TaskStatus[]).map((status) => (
