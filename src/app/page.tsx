@@ -1,8 +1,8 @@
 "use client";
 import { SubmitEvent, useEffect, useMemo, useState } from "react";
-import styles from "./page.module.css";
 import { CreateTaskInput, Task, TaskStatus } from "@/types";
 import { createTask, getTasks, updateTaskStatus } from "@/api/tasks";
+import styles from "./page.module.css";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
